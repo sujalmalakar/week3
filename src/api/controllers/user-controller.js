@@ -1,25 +1,58 @@
-import { getUsers, getUserById, addUser } from '../models/user-model.js';
+import {
+  getUsers,
+  getUserById,
+  addUser,
+  modifyUser,
+  removeUser,
+} from '../models/user-model.js';
 
-const getAllUsers = (req, res) => {
-  res.json(getUsers());
+const getAllUsers = async (req, res) => {
+  const users = await getUsers();
+  res.json(users);
 };
 
-const getOneUser = (req, res) => {
-  const user = getUserById(req.params.id);
+const getOneUser = async (req, res) => {
+  const user = await getUserById(req.params.id);
+
+  if (!user) {
+    res.status(404).json({ message: 'User not found' });
+    return;
+  }
+
   res.json(user);
 };
 
-const postUser = (req, res) => {
-  const user = addUser(req.body);
-  res.json(user);
+const postUser = async (req, res) => {
+  const user = await addUser(req.body);
+
+  if (!user) {
+    res.status(500).json({ message: 'Could not add user' });
+    return;
+  }
+
+  res.status(201).json(user);
 };
 
-const putUser = (req, res) => {
-  res.json({ message: 'User item updated.' });
+const putUser = async (req, res) => {
+  const result = await modifyUser(req.body, req.params.id);
+
+  if (!result) {
+    res.status(404).json({ message: 'User not found' });
+    return;
+  }
+
+  res.json(result);
 };
 
-const deleteUser = (req, res) => {
-  res.json({ message: 'User item deleted.' });
+const deleteUser = async (req, res) => {
+  const result = await removeUser(req.params.id);
+
+  if (!result) {
+    res.status(404).json({ message: 'User not found' });
+    return;
+  }
+
+  res.json(result);
 };
 
 export { getAllUsers, getOneUser, postUser, putUser, deleteUser };

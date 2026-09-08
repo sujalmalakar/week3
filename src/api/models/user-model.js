@@ -1,33 +1,84 @@
-const users = [
-  {
-    user_id: 1,
-    name: 'John Doe',
-    username: 'johndoe',
-    email: 'john@metropolia.fi',
-    role: 'user',
-    password: 'password',
-  },
-  {
-    user_id: 2,
-    name: 'Jane Doe',
-    username: 'janedoe',
-    email: 'jane@metropolia.fi',
-    role: 'user',
-    password: 'password',
-  },
-];
+import promisePool from '../../utils/database.js';
 
-const getUsers = () => {
-  return users;
+const getUsers = async () => {
+  const [rows] = await promisePool.query('SELECT * FROM wsk_users');
+  return rows;
 };
 
-const getUserById = (id) => {
-  return users.find((user) => user.user_id == id);
+const getUserById = async (id) => {
+  const [rows] = await promisePool.execute(
+    'SELECT * FROM wsk_users WHERE user_id = ?',
+    [id],
+  );
+
+  if (rows.length === 0) {
+    return false;
+  }
+
+  return rows[0];
 };
 
-const addUser = (user) => {
-  users.push(user);
-  return user;
+const addUser = async (user) => {
+  const { name, username, email, password, role } = user;
+
+  const sql = `
+    INSERT INTO wsk_users (name, username, email, password, role)
+    VALUES (?, ?, ?, ?, ?)
+  `;
+
+  const params = [name, username, email, password, role];
+
+  const [result] = await promisePool.execute(sql, params);
+
+  if (result.affectedRows === 0) {
+    return false;
+  }
+
+  return { user_id: result.insertId };
 };
 
-export { getUsers, getUserById, addUser };
+const modifyUser = async (user, id) => {
+  const sql = promisePool.format('UPDATE wsk_users SET ? WHERE user_id = ?', [
+    user,
+    id,
+  ]);
+
+  const [result] = await promisePool.query(sql);
+
+  if (result.affectedRows === 0) {
+    return false;
+  }
+
+  return { message: 'User updated successfully' };
+};
+
+const removeUser = async (id) => {
+  const connection = await promisePool.getConnection();
+
+  try {
+    await connection.beginTransaction();
+
+    await connection.execute('DELETE FROM wsk_cats WHERE owner = ?', [id]);
+
+    const [result] = await connection.execute(
+      'DELETE FROM wsk_users WHERE user_id = ?',
+      [id],
+    );
+
+    if (result.affectedRows === 0) {
+      await connection.rollback();
+      return false;
+    }
+
+    await connection.commit();
+
+    return { message: 'User and their cats deleted successfully' };
+  } catch (error) {
+    await connection.rollback();
+    throw error;
+  } finally {
+    connection.release();
+  }
+};
+
+export { getUsers, getUserById, addUser, modifyUser, removeUser };

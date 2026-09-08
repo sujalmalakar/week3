@@ -1,25 +1,72 @@
-import { getCats, getCatById, addCat } from '../models/cat-model.js';
+import {
+  getCats,
+  getCatById,
+  getCatsByUserId,
+  addCat,
+  modifyCat,
+  removeCat,
+} from '../models/cat-model.js';
 
-const getAllCats = (req, res) => {
-  res.json(getCats());
+const getAllCats = async (req, res) => {
+  const cats = await getCats();
+  res.json(cats);
 };
 
-const getOneCat = (req, res) => {
-  const cat = getCatById(req.params.id);
+const getOneCat = async (req, res) => {
+  const cat = await getCatById(req.params.id);
+
+  if (!cat) {
+    res.status(404).json({ message: 'Cat not found' });
+    return;
+  }
+
   res.json(cat);
 };
 
-const postCat = (req, res) => {
-  const cat = addCat(req.body);
-  res.json(cat);
+const getCatsByUser = async (req, res) => {
+  const cats = await getCatsByUserId(req.params.userId);
+  res.json(cats);
 };
 
-const putCat = (req, res) => {
-  res.json({ message: 'Cat item updated.' });
+const postCat = async (req, res) => {
+  console.log('body:', req.body);
+  console.log('file:', req.file);
+
+  const catData = {
+    ...req.body,
+    filename: req.file.filename,
+  };
+
+  const result = await addCat(catData);
+
+  if (!result) {
+    res.status(500).json({ message: 'Could not add cat' });
+    return;
+  }
+
+  res.status(201).json(result);
 };
 
-const deleteCat = (req, res) => {
-  res.json({ message: 'Cat item deleted.' });
+const putCat = async (req, res) => {
+  const result = await modifyCat(req.body, req.params.id);
+
+  if (!result) {
+    res.status(404).json({ message: 'Cat not found' });
+    return;
+  }
+
+  res.json(result);
 };
 
-export { getAllCats, getOneCat, postCat, putCat, deleteCat };
+const deleteCat = async (req, res) => {
+  const result = await removeCat(req.params.id);
+
+  if (!result) {
+    res.status(404).json({ message: 'Cat not found' });
+    return;
+  }
+
+  res.json(result);
+};
+
+export { getAllCats, getOneCat, getCatsByUser, postCat, putCat, deleteCat };

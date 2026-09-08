@@ -1,0 +1,92 @@
+    ### Get all cats
+GET http://127.0.0.1:3000/api/v1/cats
+
+### Get cat 1
+GET http://127.0.0.1:3000/api/v1/cats/1
+
+### Get all users
+GET http://127.0.0.1:3000/api/v1/users
+
+### Get user 1
+GET http://127.0.0.1:3000/api/v1/users/1
+
+### Add new user
+POST http://127.0.0.1:3000/api/v1/users
+Content-Type: application/json
+
+{
+  "user_id": 3,
+  "name": "Mike Smith",
+  "username": "mikesmith",
+  "email": "mike@metropolia.fi",
+  "role": "user",
+  "password": "password"
+}
+
+### Update cat
+PUT http://127.0.0.1:3000/api/v1/cats/1
+Content-Type: application/json
+
+{
+  "name": "Updated Misu"
+}
+
+### Delete cat
+DELETE http://127.0.0.1:3000/api/v1/cats/1
+
+### Update user
+PUT http://127.0.0.1:3000/api/v1/users/1
+Content-Type: application/json
+
+{
+  "name": "Updated John"
+}
+
+### Delete user
+DELETE http://127.0.0.1:3000/api/v1/users/1
+
+### Add new cat with image
+POST http://127.0.0.1:3000/api/v1/cats HTTP/1.1
+Content-Type: multipart/form-data; boundary=MyBoundary
+
+--MyBoundary
+Content-Disposition: form-data; name="name"
+
+Bella
+--MyBoundary
+Content-Disposition: form-data; name="weight"
+
+6
+--MyBoundary
+Content-Disposition: form-data; name="owner"
+
+3602
+--MyBoundary
+Content-Disposition: form-data; name="birthdate"
+
+2023-10-08
+--MyBoundary
+Content-Disposition: form-data; name="cat"; filename="cat1.jpg"
+Content-Type: image/jpeg
+
+< ./public/cat1.jpg
+--MyBoundary--
+
+### Get cats by user id
+GET http://127.0.0.1:3000/api/v1/cats/user/37
+
+### Update cat in database
+PUT http://127.0.0.1:3000/api/v1/cats/41
+Content-Type: application/json
+
+{
+  "cat_name": "Updated Siiri"
+}
+
+### Update user in database
+PUT http://127.0.0.1:3000/api/v1/users/37
+Content-Type: application/json
+
+{
+  "name": "Updated Test User"
+}

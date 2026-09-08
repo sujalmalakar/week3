@@ -1,18 +1,25 @@
+import multer from 'multer';
 import express from 'express';
 
 import {
   getAllCats,
   getOneCat,
+  getCatsByUser,
   postCat,
   putCat,
   deleteCat,
 } from '../controllers/cat-controller.js';
 
+const upload = multer({ dest: 'uploads/' });
+
 const router = express.Router();
 
 router.get('/', getAllCats);
+router.get('/user/:userId', getCatsByUser);
 router.get('/:id', getOneCat);
-router.post('/', postCat);
+
+router.post('/', upload.single('cat'), postCat);
+
 router.put('/:id', putCat);
 router.delete('/:id', deleteCat);
 
