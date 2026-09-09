@@ -1,3 +1,4 @@
+import bcrypt from 'bcrypt';
 import {
   getUsers,
   getUserById,
@@ -23,6 +24,8 @@ const getOneUser = async (req, res) => {
 };
 
 const postUser = async (req, res) => {
+  req.body.password = bcrypt.hashSync(req.body.password, 10);
+
   const user = await addUser(req.body);
 
   if (!user) {
@@ -34,7 +37,15 @@ const postUser = async (req, res) => {
 };
 
 const putUser = async (req, res) => {
-  const result = await modifyUser(req.body, req.params.id);
+  if (res.locals.user.role !== 'admin') {
+    delete req.body.role;
+  }
+  const result = await modifyUser(
+    req.body,
+    req.params.id,
+    res.locals.user.user_id,
+    res.locals.user.role,
+  );
 
   if (!result) {
     res.status(404).json({ message: 'User not found' });
@@ -45,7 +56,11 @@ const putUser = async (req, res) => {
 };
 
 const deleteUser = async (req, res) => {
-  const result = await removeUser(req.params.id);
+  const result = await removeUser(
+    req.params.id,
+    res.locals.user.user_id,
+    res.locals.user.role,
+  );
 
   if (!result) {
     res.status(404).json({ message: 'User not found' });

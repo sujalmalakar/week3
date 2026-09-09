@@ -90,3 +90,160 @@ Content-Type: application/json
 {
   "name": "Updated Test User"
 }
+
+### Delete user and their cats
+DELETE http://127.0.0.1:3000/api/v1/users/37
+###
+POST http://127.0.0.1:3000/api/v1/users
+Content-Type: application/json
+
+{
+  "name": "Login Test",
+  "username": "logintest",
+  "email": "logintest@test.com",
+  "password": "password123",
+  "role": "user"
+}
+
+###
+
+GET http://127.0.0.1:3000/api/v1/auth/me
+Authorization: Bearer {{login.response.body.token}}
+
+###
+# @name login
+POST http://127.0.0.1:3000/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "username": "logintest",
+  "password": "password123"
+}
+
+###
+PUT http://127.0.0.1:3000/api/v1/users/1
+Content-Type: application/json
+Authorization: Bearer {{login.response.body.token}}
+
+{
+  "name": "Should Not Change"
+}
+
+###
+PUT http://127.0.0.1:3000/api/v1/users/38
+Content-Type: application/json
+Authorization: Bearer {{login.response.body.token}}
+
+{
+  "name": "Login Test Updated"
+}
+
+###
+GET http://127.0.0.1:3000/api/v1/cats
+
+###
+
+PUT http://127.0.0.1:3000/api/v1/cats/41
+Content-Type: application/json
+Authorization: Bearer {{login.response.body.token}}
+
+{
+  "cat_name": "Should Not Change"
+}
+
+###
+
+PUT http://127.0.0.1:3000/api/v1/users/38
+Content-Type: application/json
+Authorization: Bearer {{login.response.body.token}}
+
+{
+  "name": "Login Test Updated",
+  "role": "admin"
+}
+
+###
+
+GET http://127.0.0.1:3000/api/v1/users/38
+
+###
+
+GET http://127.0.0.1:3000/api/v1/users
+
+###
+# @name adminLogin
+POST http://127.0.0.1:3000/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "admin123"
+}
+
+###
+GET http://127.0.0.1:3000/api/v1/auth/me
+Authorization: Bearer {{adminLogin.response.body.token}}
+
+###
+
+PUT http://127.0.0.1:3000/api/v1/users/38
+Content-Type: application/json
+Authorization: Bearer {{adminLogin.response.body.token}}
+
+{
+  "name": "Updated By Admin"
+}
+
+###
+
+PUT http://127.0.0.1:3000/api/v1/cats/41
+Content-Type: application/json
+Authorization: Bearer {{adminLogin.response.body.token}}
+
+{
+  "cat_name": "Updated By Admin"
+}
+
+###
+GET http://127.0.0.1:3000/api/v1/cats
+
+###
+POST http://127.0.0.1:3000/api/v1/cats
+Authorization: Bearer {{login.response.body.token}}
+Content-Type: multipart/form-data; boundary=MyBoundary
+
+--MyBoundary
+Content-Disposition: form-data; name="cat_name"
+
+Admin Test Cat
+--MyBoundary
+Content-Disposition: form-data; name="weight"
+
+5
+--MyBoundary
+Content-Disposition: form-data; name="birthdate"
+
+2024-01-01
+--MyBoundary
+Content-Disposition: form-data; name="cat"; filename="cat1.jpg"
+Content-Type: image/jpeg
+
+< ./public/cat1.jpg
+--MyBoundary--
+
+###
+PUT http://127.0.0.1:3000/api/v1/cats/43
+Content-Type: application/json
+Authorization: Bearer {{adminLogin.response.body.token}}
+
+{
+  "cat_name": "Updated By Admin"
+}
+
+###
+DELETE http://127.0.0.1:3000/api/v1/cats/43
+Authorization: Bearer {{login.response.body.token}}
+
+###
+DELETE http://127.0.0.1:3000/api/v1/cats/44
+Authorization: Bearer {{adminLogin.response.body.token}}

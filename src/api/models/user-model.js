@@ -1,13 +1,19 @@
 import promisePool from '../../utils/database.js';
 
 const getUsers = async () => {
-  const [rows] = await promisePool.query('SELECT * FROM wsk_users');
+  const [rows] = await promisePool.query(
+    `SELECT user_id, name, username, email, role
+     FROM wsk_users`,
+  );
+
   return rows;
 };
 
 const getUserById = async (id) => {
   const [rows] = await promisePool.execute(
-    'SELECT * FROM wsk_users WHERE user_id = ?',
+    `SELECT user_id, name, username, email, role
+     FROM wsk_users
+     WHERE user_id = ?`,
     [id],
   );
 
@@ -37,11 +43,20 @@ const addUser = async (user) => {
   return { user_id: result.insertId };
 };
 
-const modifyUser = async (user, id) => {
-  const sql = promisePool.format('UPDATE wsk_users SET ? WHERE user_id = ?', [
-    user,
-    id,
-  ]);
+const modifyUser = async (user, id, loggedInUserId, role) => {
+  let sql;
+
+  if (role === 'admin') {
+    sql = promisePool.format('UPDATE wsk_users SET ? WHERE user_id = ?', [
+      user,
+      id,
+    ]);
+  } else {
+    sql = promisePool.format(
+      'UPDATE wsk_users SET ? WHERE user_id = ? AND user_id = ?',
+      [user, id, loggedInUserId],
+    );
+  }
 
   const [result] = await promisePool.query(sql);
 
@@ -52,11 +67,16 @@ const modifyUser = async (user, id) => {
   return { message: 'User updated successfully' };
 };
 
-const removeUser = async (id) => {
+const removeUser = async (id, loggedInUserId, role) => {
   const connection = await promisePool.getConnection();
 
   try {
     await connection.beginTransaction();
+
+    if (role !== 'admin' && Number(id) !== Number(loggedInUserId)) {
+      await connection.rollback();
+      return false;
+    }
 
     await connection.execute('DELETE FROM wsk_cats WHERE owner = ?', [id]);
 
@@ -81,4 +101,24 @@ const removeUser = async (id) => {
   }
 };
 
-export { getUsers, getUserById, addUser, modifyUser, removeUser };
+const getUserByUsername = async (username) => {
+  const [rows] = await promisePool.execute(
+    'SELECT * FROM wsk_users WHERE username = ?',
+    [username],
+  );
+
+  if (rows.length === 0) {
+    return false;
+  }
+
+  return rows[0];
+};
+
+export {
+  getUsers,
+  getUserById,
+  addUser,
+  modifyUser,
+  removeUser,
+  getUserByUsername,
+};

@@ -35,6 +35,7 @@ const postCat = async (req, res) => {
   const catData = {
     ...req.body,
     filename: req.file.filename,
+    owner: res.locals.user.user_id,
   };
 
   const result = await addCat(catData);
@@ -48,7 +49,12 @@ const postCat = async (req, res) => {
 };
 
 const putCat = async (req, res) => {
-  const result = await modifyCat(req.body, req.params.id);
+  const result = await modifyCat(
+    req.body,
+    req.params.id,
+    res.locals.user.user_id,
+    res.locals.user.role,
+  );
 
   if (!result) {
     res.status(404).json({ message: 'Cat not found' });
@@ -59,7 +65,11 @@ const putCat = async (req, res) => {
 };
 
 const deleteCat = async (req, res) => {
-  const result = await removeCat(req.params.id);
+  const result = await removeCat(
+    req.params.id,
+    res.locals.user.user_id,
+    res.locals.user.role,
+  );
 
   if (!result) {
     res.status(404).json({ message: 'Cat not found' });
