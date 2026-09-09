@@ -247,3 +247,149 @@ Authorization: Bearer {{login.response.body.token}}
 ###
 DELETE http://127.0.0.1:3000/api/v1/cats/44
 Authorization: Bearer {{adminLogin.response.body.token}}
+
+###
+POST http://127.0.0.1:3000/api/v1/users
+Content-Type: application/json
+
+{
+  "username": "a",
+  "email": "not-an-email",
+  "password": "123"
+}
+
+###
+GET http://127.0.0.1:3000/api/v1/does-not-exist
+
+###
+POST http://127.0.0.1:3000/api/v1/cats
+Authorization: Bearer {{login.response.body.token}}
+Content-Type: multipart/form-data; boundary=MyBoundary
+
+--MyBoundary
+Content-Disposition: form-data; name="cat_name"
+
+A
+--MyBoundary
+Content-Disposition: form-data; name="weight"
+
+not-a-number
+--MyBoundary
+Content-Disposition: form-data; name="birthdate"
+
+not-a-date
+--MyBoundary
+Content-Disposition: form-data; name="cat"; filename="cat1.jpg"
+Content-Type: image/jpeg
+
+< ./public/cat1.jpg
+--MyBoundary--
+
+###
+POST http://127.0.0.1:3000/api/v1/cats
+Authorization: Bearer {{login.response.body.token}}
+Content-Type: multipart/form-data; boundary=MyBoundary
+
+--MyBoundary
+Content-Disposition: form-data; name="cat_name"
+
+Test Cat
+--MyBoundary
+Content-Disposition: form-data; name="weight"
+
+5
+--MyBoundary
+Content-Disposition: form-data; name="birthdate"
+
+2024-01-01
+--MyBoundary
+Content-Disposition: form-data; name="cat"; filename="test.rest"
+Content-Type: text/plain
+
+< ./test.rest
+--MyBoundary--
+
+###
+POST http://127.0.0.1:3000/api/v1/users
+Content-Type: application/json
+
+{
+  "name": "Validation Test",
+  "username": "validationtest",
+  "email": "validation@test.com",
+  "password": "password123",
+  "role": "user"
+}
+
+###
+POST http://127.0.0.1:3000/api/v1/users
+Content-Type: application/json
+
+{}
+
+###
+POST http://127.0.0.1:3000/api/v1/cats
+Authorization: Bearer {{login.response.body.token}}
+Content-Type: multipart/form-data; boundary=MyBoundary
+
+--MyBoundary
+--MyBoundary--
+
+###
+POST http://127.0.0.1:3000/api/v1/cats
+Authorization: Bearer {{login.response.body.token}}
+Content-Type: multipart/form-data; boundary=MyBoundary
+
+--MyBoundary
+Content-Disposition: form-data; name="cat_name"
+
+Admin Test Cat
+--MyBoundary
+Content-Disposition: form-data; name="weight"
+
+5
+--MyBoundary
+Content-Disposition: form-data; name="birthdate"
+
+2024-01-01
+--MyBoundary
+Content-Disposition: form-data; name="cat"; filename="cat1.jpg"
+Content-Type: image/jpeg
+
+< ./public/cat1.jpg
+--MyBoundary--
+
+###
+POST http://127.0.0.1:3000/api/v1/cats
+Authorization: Bearer {{login.response.body.token}}
+Content-Type: application/json
+
+{
+  "cat_name": "Test Cat",
+  "weight": 5,
+  "birthdate": "2024-01-01"
+}
+
+###
+POST http://127.0.0.1:3000/api/v1/cats
+Authorization: Bearer {{login.response.body.token}}
+Content-Type: multipart/form-data; boundary=MyBoundary
+
+--MyBoundary
+Content-Disposition: form-data; name="cat_name"
+
+Large File Test
+--MyBoundary
+Content-Disposition: form-data; name="weight"
+
+5
+--MyBoundary
+Content-Disposition: form-data; name="birthdate"
+
+2024-01-01
+--MyBoundary
+Content-Disposition: form-data; name="cat"; filename="large-test.jpg"
+Content-Type: image/jpeg
+
+< ./public/large-test.jpg
+--MyBoundary--

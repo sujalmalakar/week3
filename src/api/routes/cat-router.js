@@ -1,5 +1,7 @@
+import { body } from 'express-validator';
+import { upload } from '../../middlewares/upload.js';
 import { authenticateToken } from '../../middlewares/authentication.js';
-import multer from 'multer';
+import { validationErrors } from '../../middlewares/error-handlers.js';
 import express from 'express';
 
 import {
@@ -11,17 +13,33 @@ import {
   deleteCat,
 } from '../controllers/cat-controller.js';
 
-const upload = multer({ dest: 'uploads/' });
-
 const router = express.Router();
 
 router.get('/', getAllCats);
 router.get('/user/:userId', getCatsByUser);
 router.get('/:id', getOneCat);
 
-router.post('/', authenticateToken, upload.single('cat'), postCat);
+router.post(
+  '/',
+  authenticateToken,
+  (req, res, next) => {
+    upload.single('cat')(req, res, (err) => {
+      if (err) {
+        err.status = 400;
+        return next(err);
+      }
 
-router.put('/:id', authenticateToken, putCat);
-router.delete('/:id', authenticateToken, deleteCat);
+      next();
+    });
+  },
+  body('cat_name')
+    .trim()
+    .isLength({ min: 3, max: 50 })
+    .withMessage('Cat name must be 3-50 characters'),
+  body('weight').isNumeric().withMessage('Weight must be a number'),
+  body('birthdate').isDate().withMessage('Birthdate must be a valid date'),
+  validationErrors,
+  postCat,
+);
 
 export default router;

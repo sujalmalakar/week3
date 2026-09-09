@@ -12,12 +12,13 @@ const getAllCats = async (req, res) => {
   res.json(cats);
 };
 
-const getOneCat = async (req, res) => {
+const getOneCat = async (req, res, next) => {
   const cat = await getCatById(req.params.id);
 
   if (!cat) {
-    res.status(404).json({ message: 'Cat not found' });
-    return;
+    const error = new Error('Cat not found');
+    error.status = 404;
+    return next(error);
   }
 
   res.json(cat);
@@ -28,9 +29,15 @@ const getCatsByUser = async (req, res) => {
   res.json(cats);
 };
 
-const postCat = async (req, res) => {
+const postCat = async (req, res, next) => {
   console.log('body:', req.body);
   console.log('file:', req.file);
+
+  if (!req.file) {
+    const error = new Error('Invalid or missing file');
+    error.status = 400;
+    return next(error);
+  }
 
   const catData = {
     ...req.body,
@@ -41,14 +48,13 @@ const postCat = async (req, res) => {
   const result = await addCat(catData);
 
   if (!result) {
-    res.status(500).json({ message: 'Could not add cat' });
-    return;
+    return next(new Error('Could not add cat'));
   }
 
   res.status(201).json(result);
 };
 
-const putCat = async (req, res) => {
+const putCat = async (req, res, next) => {
   const result = await modifyCat(
     req.body,
     req.params.id,
@@ -57,14 +63,15 @@ const putCat = async (req, res) => {
   );
 
   if (!result) {
-    res.status(404).json({ message: 'Cat not found' });
-    return;
+    const error = new Error('Cat not found');
+    error.status = 404;
+    return next(error);
   }
 
   res.json(result);
 };
 
-const deleteCat = async (req, res) => {
+const deleteCat = async (req, res, next) => {
   const result = await removeCat(
     req.params.id,
     res.locals.user.user_id,
@@ -72,8 +79,9 @@ const deleteCat = async (req, res) => {
   );
 
   if (!result) {
-    res.status(404).json({ message: 'Cat not found' });
-    return;
+    const error = new Error('Cat not found');
+    error.status = 404;
+    return next(error);
   }
 
   res.json(result);
